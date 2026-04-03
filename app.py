@@ -26,7 +26,7 @@ custom_css = """
     
     /* User Message Bubble (Darker - Odd messages) */
     [data-testid="stChatMessage"]:nth-child(odd) {
-        background-color: #1A1A1A;
+        background-color: #171717;
         border-radius: 15px;
         padding: 15px;
         margin-bottom: 15px;
