@@ -24,12 +24,23 @@ custom_css = """
         box-shadow: 5px 0px 15px rgba(0, 0, 0, 0.4);
     }
     
-    /* Styling the Chat Bubbles to look like floating cards */
-    [data-testid="stChatMessage"] {
+    /* User Message Bubble (Darker - Odd messages) */
+    [data-testid="stChatMessage"]:nth-child(odd) {
+        background-color: #1A1A1A;
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid #333;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Bot Message Bubble (Lighter - Even messages) */
+    [data-testid="stChatMessage"]:nth-child(even) {
         background-color: #2F2F2F;
         border-radius: 15px;
         padding: 15px;
         margin-bottom: 15px;
+        border: 1px solid #444;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
     }
     
@@ -133,14 +144,20 @@ for message in st.session_state.messages:
 
 # --- 5. CHAT LOGIC ---
 if user_prompt := st.chat_input("Message your AI..."):
+    
+    # 1. Display & Save User Message
     st.chat_message("user", avatar=avatars["user"]).markdown(user_prompt)
     st.session_state.messages.append({"role": "user", "content": user_prompt})
     
-    response = model.generate_content(user_prompt)
-    
+    # 2. Display Bot Avatar, Show Typing Animation, Then Show Response
     with st.chat_message("assistant", avatar=avatars["assistant"]):
+        with st.spinner("🤖 Thinking..."):
+            response = model.generate_content(user_prompt)
         st.markdown(response.text)
+        
+    # 3. Save AI Response to session memory
     st.session_state.messages.append({"role": "assistant", "content": response.text})
 
+    # 4. Save the updated list back into the master folder in the browser
     all_chats[st.session_state.current_chat_id] = st.session_state.messages
     localS.setItem("all_chats", all_chats)
