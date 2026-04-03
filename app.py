@@ -13,14 +13,14 @@ custom_css = """
 <style>
     /* Main App Background (Deeper Gray/Black) */
     .stApp {
-        background-color: #212121;
+        background-color: #212020;
         color: #ECECEC;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
     /* 1. Sidebar Panel (Slightly Lighter Vibe than design, but defined panel) */
     [data-testid="stSidebar"] {
-        background-color: #1A1A1A !important;
+        background-color: #333333 !important;
         border-right: none !important;
         box-shadow: 5px 0px 15px rgba(0, 0, 0, 0.4);
         padding-top: 1rem;
@@ -29,7 +29,7 @@ custom_css = """
     /* 2. Side-by-Side Control Buttons in Sidebar (Floating Card) */
     .stButton>button {
         border-radius: 25px !important;
-        background-color: #2F2F2F !important;
+        background-color: #474747 !important;
         color: #ECECEC !important;
         border: 1px solid #444 !important;
         transition: all 0.3s ease;
