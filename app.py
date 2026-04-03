@@ -11,7 +11,7 @@ api_key = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=api_key)
 
 # 3. Initialize the Gemini Model
-model = genai.GenerativeModel('gemini-2.5-flash')
+model = genai.GenerativeModel('gemini-2.5-pro')
 
 # 4. Set up the chat history memory
 if "messages" not in st.session_state:
