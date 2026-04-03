@@ -8,38 +8,79 @@ localS = LocalStorage()
 
 st.set_page_config(page_title="Our Private AI", page_icon="💖", layout="centered")
 
+# --- UI UPGRADE: CUSTOM CSS FOR MODERN DARK THEME & FLOATING ELEMENTS ---
+custom_css = """
+<style>
+    /* Main App Background (Deep Gray/Black) */
+    .stApp {
+        background-color: #212121;
+        color: #ECECEC;
+    }
+    
+    /* Floating Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background-color: #171717 !important;
+        border-right: none !important;
+        box-shadow: 5px 0px 15px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Styling the Chat Bubbles to look like floating cards */
+    [data-testid="stChatMessage"] {
+        background-color: #2F2F2F;
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Styling the Chat Input Box */
+    [data-testid="stChatInput"] {
+        background-color: #2F2F2F !important;
+        border-radius: 25px !important;
+        border: 1px solid #444 !important;
+        box-shadow: 0px -5px 15px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Floating modern buttons in the Sidebar */
+    .stButton>button {
+        border-radius: 12px !important;
+        background-color: #2F2F2F !important;
+        color: #ECECEC !important;
+        border: 1px solid #444 !important;
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #3F3F3F !important;
+        border-color: #666 !important;
+        transform: translateY(-2px);
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+    }
+</style>
+"""
+st.markdown(custom_css, unsafe_allow_html=True)
+
 # --- 1. LOAD MASTER FOLDER FROM BROWSER ---
-# We look for "all_chats" which is a dictionary holding all conversations
 all_chats = localS.getItem("all_chats")
 
-# If it's a new user or empty, create the first default chat
 if not all_chats or not isinstance(all_chats, dict):
     all_chats = {"Chat 1": []}
     localS.setItem("all_chats", all_chats)
 
-# Set the active chat in session state
 if "current_chat_id" not in st.session_state:
-    # Default to the first available chat
     st.session_state.current_chat_id = list(all_chats.keys())[0]
 
-# Failsafe: if the current chat id somehow got deleted, reset it
 if st.session_state.current_chat_id not in all_chats:
     all_chats[st.session_state.current_chat_id] = []
 
-# Sync the active messages so the screen displays the right chat
 st.session_state.messages = all_chats[st.session_state.current_chat_id]
 
 # --- 2. SIDEBAR & SETTINGS ---
 with st.sidebar:
     st.title("⚙️ Controls")
     
-    # NEW CHAT BUTTON
     if st.button("➕ New Chat", use_container_width=True):
-        # Generate a unique name using the current time so they don't overwrite
         time_str = datetime.datetime.now().strftime("%I:%M %p")
         new_chat_name = f"Chat at {time_str}"
-        
-        # Create a blank list for this new chat and switch to it
         all_chats[new_chat_name] = []
         st.session_state.current_chat_id = new_chat_name
         localS.setItem("all_chats", all_chats)
@@ -47,7 +88,6 @@ with st.sidebar:
 
     st.divider()
 
-    # AI MODEL SELECTION
     selected_model = st.selectbox(
         "🧠 Choose AI Model",
         ["gemini-2.5-flash", "gemini-3.1-pro-preview", "gemini-3-flash-preview"]
@@ -55,32 +95,25 @@ with st.sidebar:
 
     st.divider()
 
-    # RECENT CHATS LIST
     st.subheader("📝 Recent Chats")
     chat_names = list(all_chats.keys())
     
-    # Radio buttons let the user click between different histories
     selected_chat = st.radio(
         "Switch conversation:", 
         chat_names, 
         index=chat_names.index(st.session_state.current_chat_id)
     )
     
-    # If they click a different radio button, switch the active chat
     if selected_chat != st.session_state.current_chat_id:
         st.session_state.current_chat_id = selected_chat
         st.rerun()
 
     st.divider()
 
-    # DELETE CHAT BUTTON
     if st.button("🗑️ Delete This Chat", use_container_width=True):
         del all_chats[st.session_state.current_chat_id]
-        
-        # Prevent the app from crashing if they delete all chats
         if len(all_chats) == 0:
             all_chats = {"Chat 1": []} 
-            
         st.session_state.current_chat_id = list(all_chats.keys())[0]
         localS.setItem("all_chats", all_chats)
         st.rerun()
@@ -94,26 +127,20 @@ model = genai.GenerativeModel(selected_model)
 st.title(f"{st.session_state.current_chat_id} ✨")
 avatars = {"user": "🧑‍💻", "assistant": "🤖"}
 
-# Display the messages for the currently selected chat
 for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=avatars[message["role"]]):
         st.markdown(message["content"])
 
 # --- 5. CHAT LOGIC ---
 if user_prompt := st.chat_input("Message your AI..."):
-    
-    # Display & Save User Message
     st.chat_message("user", avatar=avatars["user"]).markdown(user_prompt)
     st.session_state.messages.append({"role": "user", "content": user_prompt})
     
-    # Get AI Response
     response = model.generate_content(user_prompt)
     
-    # Display & Save AI Response
     with st.chat_message("assistant", avatar=avatars["assistant"]):
         st.markdown(response.text)
     st.session_state.messages.append({"role": "assistant", "content": response.text})
 
-    # Save the updated list back into the master folder in the browser!
     all_chats[st.session_state.current_chat_id] = st.session_state.messages
     localS.setItem("all_chats", all_chats)
