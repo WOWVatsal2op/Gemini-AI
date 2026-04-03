@@ -192,7 +192,7 @@ if user_prompt := st.chat_input("Write your message here..."):
     # If the user says exactly "143", the AI must reply with "I love you!"
     # instead of telling what it means.
     if user_prompt.strip() == "143":
-        custom_response = "I love you! 💖"
+        custom_response = "Hey my cutie, its your husband here! I just wanted to let you know im so proud of you, i forever will be! I love you so much my dear, I love you forever! <3"
         with st.chat_message("assistant", avatar=avatars["assistant"]):
             st.markdown(custom_response)
         st.session_state.messages.append({"role": "assistant", "content": custom_response})
