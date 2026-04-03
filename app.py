@@ -22,8 +22,8 @@ with st.sidebar:
         st.rerun() # Refreshes the app instantly
 
 # Main Page Header
-st.title("Welcome to My Gemini Chatbot! ✨")
-st.caption("A custom AI assistant built with Python and Streamlit.")
+st.title("Welcome to uh some random ai! ✨")
+st.caption("A custom AI assistant built with love <3")
 
 # Load API Key safely
 api_key = st.secrets["GEMINI_API_KEY"]
